@@ -5,14 +5,20 @@ export default class OpenAi extends EventTarget {
     super()
     this.apiKey = apiKey
     this.sk = new SpeechKit(speechOptions)
-    this.bookSSML = null
     this.baseUrl = 'https://api.openai.com/v1/completions'
     this.books = {}
     this.booksReady = false
+    this.currentBook = {}
+    this.apiUrl = 'https://gpt-audiobook.jcompsolu.com'
   }
 
   async generateBook (data = {}) {
     try {
+      this.dispatchEvent(new CustomEvent('storygenerating', {
+        detail: {
+          event: event
+        }
+      }))
       const res = await fetch(this.baseUrl, {
         method: 'POST', // *GET, POST, PUT, DELETE, etc.
         headers: {
@@ -22,11 +28,17 @@ export default class OpenAi extends EventTarget {
         body: JSON.stringify(data) // body data type must match "Content-Type" header
       });
       this.books = await res.json()
-      this.saveStory(this.books.choices[0])
       this.booksReady = true
-      this.dispatchEvent(new Event('storygenerated'))
-    } catch (e) {
-      alert(e.message)
+      console.log(JSON.parse(this.books.choices[0].text.trim()))
+      this.currentBook = JSON.parse(this.books.choices[0].text.trim())
+      console.log(this.currentBook)
+      this.dispatchEvent(new CustomEvent('storygenerated', {
+        detail: {
+          book: this.currentBook
+        }
+      }))
+    } catch (e){
+      console.log(e)
       this.booksReady = false
       this.dispatchEvent(new Event('storygeneratederror'))
     }
@@ -42,24 +54,46 @@ export default class OpenAi extends EventTarget {
 
   async readStory (prompt) {
     try {
-      this.addEventListener('onspeechkitutterencestart', function () {
+      this.sk.addEventListener('speechkitutterancestart', function (event) {
+        console.log(event)
         this.isPlaying =  true
       })
-      this.addEventListener('onspeechkitutterenceend', function () {
+      this.sk.addEventListener('speechkitutteranceend', function (event) {
+        console.log(event)
         this.isPlaying =  false
+        this.dispatchEvent(new CustomEvent('storyreadended',{
+          bubbles: true,
+          detail: {
+            book: this.currentBook
+          }
+        }))
       })
-      const data = { model: "text-davinci-003", prompt: prompt, temperature: 0.9, max_tokens: 500}
+      const data = { model: "text-davinci-003", prompt: prompt, temperature: 0.95, max_tokens: 1200}
+
       await this.generateBook(data)
       if(this.booksReady) {
-        const ssml = this.books.choices[0].text.trim()
-        this.sk.speak(ssml)
-        this.dispatchEvent(new Event('storyreadgenerated'))
+
+        this.dispatchEvent(new CustomEvent('storyreadstarted',{
+          bubbles: true,
+          detail: {
+            book: this.currentBook
+          }
+        }))
+        this.saveStory(this.currentBook)
+        this.sk.speak(this.currentBook.ssml)
+
+
       } else {
         throw new Error('ChatGPT is busy right now. Please try again in a few minutes!')
         }
       } catch (e) {
-      alert(e.message)
-      this.dispatchEvent(new Event('storyreaderror'))
+        try {
+          this.sk.speak(this.currentBook.text)
+        } catch (e) {
+          alert(e.message)
+          this.dispatchEvent(new Event('storyreaderror'))
+        }
+
     }
   }
 
@@ -68,8 +102,9 @@ export default class OpenAi extends EventTarget {
     return text.trim()
   }
 
-  saveStory(book) {
+  async saveStory(book) {
     try {
+      console.log(book)
       if(localStorage.books !== null) {
         const books = JSON.parse(localStorage.books)
         books.push(book)
@@ -77,9 +112,16 @@ export default class OpenAi extends EventTarget {
       } else {
         localStorage.books = JSON.stringify([book])
       }
-    } catch (e) {
+      await fetch(this.apiUrl + '/api/upload-story', {
+        method: 'POST', // *GET, POST, PUT, DELETE, etc.
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({data:book}) // body data type must match "Content-Type" header
+      })
+    } catch (e){
       console.log(e)
-      return
+      return e
     }
   }
 }
