@@ -5,9 +5,12 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "buildSk": "cd ../speech-kit/ && sh local-build.sh 2.0.1 ~/Desktop ",
+    "localTest": "npm run buildSk && rm -rf node_modules/ && npm install && npm run serve"
   },
   "dependencies": {
+    "@mastashake08/speech-kit": "file://~/Desktop/mastashake08-speech-kit-2.0.4.tgz",
     "core-js": "^3.8.3",
     "vue": "^2.6.14"
   },
