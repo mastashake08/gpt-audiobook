@@ -104,8 +104,7 @@ export default class OpenAi extends EventTarget {
 
   async saveStory(book) {
     try {
-      console.log(book)
-      if(localStorage.books !== null) {
+      if(localStorage.books) {
         const books = JSON.parse(localStorage.books)
         books.push(book)
         localStorage.books = JSON.stringify(books)
