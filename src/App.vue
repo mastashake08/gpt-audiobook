@@ -1,8 +1,9 @@
 <template>
   <div id="app">
     <img alt="Vue logo" src="./assets/logo.png">
-    <span v-if="isLoading">
-      <h2> Generating Horror Short </h2>
+    <span>
+      <h2 v-if="!readyToGenerate"> Generating Horror Short </h2>
+      <h2 v-else> AI Horror Audiobooks </h2>
     </span>
     <button @click="generateBook" v-if="readyToGenerate">Generate Horror Short</button>
     <ul v-if="isPlaying">
@@ -22,7 +23,7 @@ export default {
       isPlaying: false,
       openAi: {},
       books: [],
-      prompt: 'generate a 3 paragraph horror story and output an SSML file prefixing <?xml version="1.0" ?> that is serialized to a string.'
+      prompt: 'generate a 8 paragraph horror story (with a title) and output an SSML file prefixing <?xml version="1.0" ?> that is serialized to a string.'
     }
   },
   created () {
@@ -30,16 +31,19 @@ export default {
       pitch: 0.88,
       rate: 0.88
     })
-    this.openAi.onstorygenerated = () => {
+    this.openAi.addEventListener('onstorygenerated', function () {
       this.isLoading = true
-    }
-    this.openAi.onspeechkitutterancestarted = (event) => {
+    })
+    this.openAi.addEventListener('onspeechkitutterancestarted', function(event) {
       console.log(event)
-    }
+    })
   },
   computed: {
     readyToGenerate () {
       return !this.isLoading && !this.isPlaying
+    },
+    loading () {
+      return this.isLoading
     }
   },
   methods: {
@@ -57,7 +61,7 @@ export default {
     },
      generateBook () {
       const that = this
-      that.isLoading = true
+      this.isLoading = true
       const promise = new Promise(function(resolve, reject) {
       try {
         that.openAi.readStory(that.prompt)

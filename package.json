@@ -7,10 +7,11 @@
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
     "buildSk": "cd ../speech-kit/ && sh local-build.sh 2.0.1 ~/Desktop ",
-    "localTest": "npm run buildSk && rm -rf node_modules/ && npm install && npm run serve"
+    "localTest": "npm run buildSk && rm -rf node_modules/ && npm install && npm run serve",
+    "deploy": "npm run build  &&  git commit -am 'deploy to github' && git push "
   },
   "dependencies": {
-    "@mastashake08/speech-kit": "file://~/Desktop/mastashake08-speech-kit-2.0.4.tgz",
+    "@mastashake08/speech-kit": "^2.0.4",
     "core-js": "^3.8.3",
     "vue": "^2.6.14"
   },

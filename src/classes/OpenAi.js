@@ -37,7 +37,7 @@ export default class OpenAi extends EventTarget {
   }
 
   stopStory () {
-    this.sk.stopSynth()
+    this.sk.getSynth().cancel()
   }
 
   async readStory (prompt) {
