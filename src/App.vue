@@ -47,7 +47,7 @@
    data-ad-client="ca-pub-7023023584987784"
    data-ad-slot="2698286691"
    data-ad-format="auto"
-   data-full-width-responsive="true"
+   data-full-width-responsive="true">
   </Adsense>
   </div>
 </template>
