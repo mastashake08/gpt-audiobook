@@ -40,9 +40,17 @@
     <div>
       <label for="genre-select">Select A Voice</label>
       <br/>
-      <select name="voices" id="voice-select"  :value="selectedIndex" @change="setVoice($event)">
+      <select name="voices" id="voice-select"  :value="selectedVoiceIndex" @change="setVoice($event)">
         <option disabled value="-1">Select Voice</option>
           <option v-for="(voice, index) in voices" :key="index" :value="index" >{{voice.name}} - {{voice.lang}}</option>
+      </select>
+    </div>
+    <div>
+      <label for="music-select" >Select Background Music</label>
+      <br/>
+      <select name="music" id="music-select"  :value="selectedMusicIndex" @change="setMusic($event)">
+        <option disabled value="-1">Select Background Music</option>
+          <option v-for="(m, index) in music" :key="index" :value="index" >{{m}}</option>
       </select>
     </div>
     <br/>
@@ -75,14 +83,16 @@ export default {
       currentBook: {
         text: ''
       },
-      selectedIndex: -1,
+      selectedVoiceIndex: -1,
       selectedVoice: {},
+      selectedMusicIndex: 0,
       userIdea: '',
       genre: '',
       genres: ['Horror', 'Comedy', 'Love', 'True Crime', 'Sci-Fi', 'Fantasy', 'History', 'Action', 'Politics', 'Spirituality', 'Prose', 'Western', 'Legend', 'Erotica'],
       lengths: ['2 sentence', '1 paragraph', '2 paragraph', '3 paragraph','4 paragraph','5 paragraph','6 paragraph','7 paragraph','8 paragraph','9 paragraph','10 paragraph'],
       length: '',
-      voices: []
+      voices: [],
+      music: ['Scary','Adventure', 'Romantic']
     }
   },
   mounted () {
@@ -137,9 +147,12 @@ export default {
   },
   methods: {
     setVoice (e) {
-      this.selectedIndex = e.target.value
-      this.selectedVoice = this.voices[this.selectedIndex]
+      this.selectedVoiceIndex = e.target.value
+      this.selectedVoice = this.voices[this.selectedVoiceIndex]
       this.openAi.sk.setSpeechVoice(this.selectedVoice)
+    },
+    setMusic (e) {
+      this.selectedMusicIndex = e.target.value
     },
     pauseStory () {
       this.openAi.pauseStory()
@@ -149,6 +162,7 @@ export default {
       this.openAi.stopStory()
       this.isPlaying = false
       this.isLoading = false
+      this.openAi.stopBgMusic()
     },
     resumeStory () {
       this.openAi.resumeStory()
@@ -159,7 +173,7 @@ export default {
       this.isLoading = true
       const promise = new Promise(function(resolve, reject) {
       try {
-        that.openAi.readStory(that.prompt)
+        that.openAi.readStory(that.prompt, that.selectedMusicIndex)
         resolve(); // Yay! Everything went well!
       } catch (e) {
         reject(e)

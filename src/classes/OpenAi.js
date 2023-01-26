@@ -11,6 +11,11 @@ export default class OpenAi extends EventTarget {
     this.currentBook = {}
     this.apiUrl = 'https://gpt-audiobook.jcompsolu.com'
     this.sk.getVoices()
+    this.songList = [
+      '/scary.mp3',
+      '/adventure.mp3',
+      '/romantic.mp3'
+    ]
   }
 
   async generateBook (data = {}) {
@@ -50,7 +55,7 @@ export default class OpenAi extends EventTarget {
     this.sk.getSynth().cancel()
   }
 
-  async readStory (prompt) {
+  async readStory (prompt, genreIndex = 0) {
     try {
       this.sk.addEventListener('speechkitutterancestart', function () {
         this.isPlaying =  true
@@ -76,6 +81,7 @@ export default class OpenAi extends EventTarget {
           }
         }))
         this.sk.speak(this.currentBook.text)
+        this.getBgMusic(genreIndex)
         this.saveStory(this.currentBook)
 
 
@@ -85,6 +91,7 @@ export default class OpenAi extends EventTarget {
       } catch (e) {
         try {
           this.sk.speak(this.currentBook.text)
+          this.getBgMusic(genreIndex)
         } catch (e) {
           alert(e.message)
           this.dispatchEvent(new Event('storyreaderror'))
@@ -92,6 +99,23 @@ export default class OpenAi extends EventTarget {
 
     }
   }
+  async getBgMusic (genreIndex) {
+
+    this.audioContext = new AudioContext()
+    this.audio = new Audio(this.songList[genreIndex])
+    this.audio.volume = 0.3
+    const gainNode = this.audioContext.createGain();
+    gainNode.gain.setValueAtTime(0, 0.1)
+    const source = this.audioContext.createMediaElementSource(this.audio);
+    source.connect(this.audioContext.destination);
+
+    this.audio.play()
+  }
+
+
+stopBgMusic () {
+  this.audio.pause()
+}
 
   convertToText(book) {
     const text = book.text.replace(/<\/?[^>]+(>|$)/g, "")
