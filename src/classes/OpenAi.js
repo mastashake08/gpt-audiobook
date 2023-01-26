@@ -10,6 +10,7 @@ export default class OpenAi extends EventTarget {
     this.booksReady = false
     this.currentBook = {}
     this.apiUrl = 'https://gpt-audiobook.jcompsolu.com'
+    this.sk.getVoices()
   }
 
   async generateBook (data = {}) {

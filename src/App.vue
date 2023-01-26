@@ -27,14 +27,28 @@
       <textarea id="story-prompt" name="story" rows="5" cols="33" v-model="userIdea">
       </textarea>
     </div>
+    <div>
+      <label for="genre-select">Select A Voice</label>
+      <br/>
+      <select name="voices" id="voice-select"  :value="selectedIndex" @change="setVoice($event)">
+        <option disabled value="-1">Select Voice</option>
+          <option v-for="(voice, index) in voices" :key="index" :value="index" >{{voice.name}} - {{voice.lang}}</option>
+      </select>
+    </div>
     <br/>
     <div>
-    <button @click="generateBook" v-if="readyToGenerate">Generate Horror Short</button>
+    <button @click="generateBook" v-if="readyToGenerate">Generate {{genre}} Short</button>
     <ul v-if="isPlaying">
-      <button @click="pauseStory" >Pause</button>
       <button @click="stopStory" >Stop</button>
     </ul>
   </div>
+  <Adsense
+   style="display:block"
+   data-ad-client="ca-pub-7023023584987784"
+   data-ad-slot="2698286691"
+   data-ad-format="auto"
+   data-full-width-responsive="true"
+  </Adsense>
   </div>
 </template>
 
@@ -49,12 +63,21 @@ export default {
       openAi: {},
       books: [],
       currentBook: {},
+      selectedIndex: -1,
+      selectedVoice: {},
       userIdea: '',
       genre: 'Horror',
       genres: ['Horror', 'Comedy', 'Love', 'Murder Mystery', 'Sci-Fi'],
       lengths: ['2 sentence', '1 paragraph', '2 paragraph', '3 paragraph','4 paragraph','5 paragraph','6 paragraph','7 paragraph','8 paragraph','9 paragraph','10 paragraph'],
-      length: '2 sentence'
+      length: '2 sentence',
+      voices: []
     }
+  },
+  mounted () {
+    setTimeout(() => {
+      this.voices = this.openAi.sk.getVoices()
+      this.selectedVoice = this.voices[0]
+    }, "1000")
   },
   async created () {
     const res = await fetch('https://gpt-audiobook.jcompsolu.com/api/get-key')
@@ -74,7 +97,7 @@ export default {
     this.openAi.addEventListener('speechkitutterancestarted', function(event) {
       console.log(event)
     })
-    this.openAi.addEventListener('storyreadended', function(event) {
+    this.openAi.sk.synth.addEventListener('end', function(event) {
       this.isPlaying = false
       this.isLoading = false
       console.log(event)
@@ -96,6 +119,11 @@ export default {
     }
   },
   methods: {
+    setVoice (e) {
+      this.selectedIndex = e.target.value
+      this.selectedVoice = this.voices[this.selectedIndex]
+      this.openAi.sk.setSpeechVoice(this.selectedVoice)
+    },
     pauseStory () {
       this.openAi.pauseStory()
       this.isPlaying = false
