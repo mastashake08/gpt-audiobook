@@ -59,7 +59,7 @@
       <button @click="generateBook" v-if="readyToGenerate">Generate {{genre}} Story</button>
       <button @click="stopStory" v-else>Stop</button>
     </ul>
-      {{this.currentBook.text}}
+      {{getStoryText}}
   </div>
   <Adsense
     data-ad-client="ca-pub-7023023584987784"
@@ -80,9 +80,7 @@ export default {
       isPlaying: false,
       openAi: {},
       books: [],
-      currentBook: {
-        text: ''
-      },
+      currentBook: {},
       selectedVoiceIndex: -1,
       selectedVoice: {},
       selectedMusicIndex: 0,
@@ -92,7 +90,8 @@ export default {
       lengths: ['2 sentence', '1 paragraph', '2 paragraph', '3 paragraph','4 paragraph','5 paragraph','6 paragraph','7 paragraph','8 paragraph','9 paragraph','10 paragraph'],
       length: '',
       voices: [],
-      music: ['Scary','Adventure', 'Romantic']
+      music: ['Scary','Adventure', 'Romantic'],
+      storyText: ''
     }
   },
   mounted () {
@@ -108,20 +107,23 @@ export default {
       pitch: 0.88,
       rate: 0.80
     })
+    const that = this
     this.openAi.addEventListener('storygenerating', function () {
-      this.isLoading = true
+      that.isLoading = true
     })
     this.openAi.addEventListener('storygenerated', function (event) {
-      this.isLoading = false
-      this.currentBook = event.detail.book
+      that.isLoading = false
+      that.storyText = event.detail.book.text
+      that.currentBook = event.detail.book
+      console.log(that.currentBook)
 
     })
     this.openAi.addEventListener('speechkitutterancestarted', function() {
-      this.isPlaying = true
+      that.isPlaying = true
     })
     this.openAi.sk.synth.addEventListener('end', function() {
-      this.isPlaying = false
-      this.isLoading = false
+      that.isPlaying = false
+      that.isLoading = false
     })
   },
   computed: {
@@ -134,15 +136,18 @@ export default {
     playing () {
       return this.isPlaying
     },
+    getIdea () {
+      return this.userIdea
+    },
     prompt () {
-      if(this.userIdea != '') {
+      if(this.getIdea != '') {
         return `generate a ${this.length} ${this.genre} story based on ${this.userIdea} with a title. Return a well formatted JSON object with a title property that contains the title, a text property that contains the story and ssml property that contains an well formatted SSML file prefixing <?xml version="1.0" ?> generated from the story. Serialized the JSON object as a string.`
       } else {
         return `generate a ${this.length} ${this.genre} story with a title. Return a well formatted JSON object with a title property that contains the title, a text property that contains the story and ssml property that contains an well formatted SSML file prefixing <?xml version="1.0" ?> generated from the story. Serialized the JSON object as a string.`
       }
     },
-    storyText () {
-      return this.currentBook.text
+    getStoryText () {
+      return this.storyText
     }
   },
   methods: {
@@ -163,6 +168,7 @@ export default {
       this.isPlaying = false
       this.isLoading = false
       this.openAi.stopBgMusic()
+      this.storyText = ""
     },
     resumeStory () {
       this.openAi.resumeStory()
@@ -171,6 +177,7 @@ export default {
      generateBook () {
       const that = this
       this.isLoading = true
+      this.storyText = "Generating story, please give ChatGPT a few minutes to work."
       const promise = new Promise(function(resolve, reject) {
       try {
         that.openAi.readStory(that.prompt, that.selectedMusicIndex)
@@ -182,6 +189,7 @@ export default {
       promise.then(() => {
         that.isPlaying = true
         that.isLoading = false
+
       }).catch(() => {
         that.isPlaying = false
         that.isLoading = false

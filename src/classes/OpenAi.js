@@ -80,9 +80,14 @@ export default class OpenAi extends EventTarget {
             book: this.currentBook
           }
         }))
-        this.sk.speak(this.currentBook.text)
-        this.getBgMusic(genreIndex)
-        this.saveStory(this.currentBook)
+        if(typeof this.currentBook.text !== 'undefined') {
+          this.sk.speak(this.currentBook.text)
+          this.getBgMusic(genreIndex)
+          this.saveStory(this.currentBook)
+        } else {
+          this.sk.speak('ChatGPT is busy right now. Please try again in a few minutes!')
+        }
+
 
 
       } else {
@@ -90,10 +95,15 @@ export default class OpenAi extends EventTarget {
         }
       } catch (e) {
         try {
-          this.sk.speak(this.currentBook.text)
-          this.getBgMusic(genreIndex)
-        } catch (e) {
-          alert(e.message)
+          if(typeof this.currentBook.text !== 'undefined') {
+            this.sk.speak(this.currentBook.text)
+            this.getBgMusic(genreIndex)
+            this.saveStory(this.currentBook)
+          } else {
+            this.sk.speak('ChatGPT is busy right now. Please try again in a few minutes!')
+          }
+        } catch {
+          this.sk.speak('ChatGPT is busy right now. Please try again in a few minutes!')
           this.dispatchEvent(new Event('storyreaderror'))
         }
 
