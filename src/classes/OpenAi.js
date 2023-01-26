@@ -80,8 +80,8 @@ export default class OpenAi extends EventTarget {
             book: this.currentBook
           }
         }))
-        this.saveStory(this.currentBook)
         this.sk.speak(this.currentBook.text)
+        this.saveStory(this.currentBook)
 
 
       } else {
