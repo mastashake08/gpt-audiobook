@@ -4,21 +4,31 @@
     <span>
       <h2 v-if="loading"> Generating AI Short Story</h2>
       <h2 v-else> AI Generated Audiobooks </h2>
+      <Adsense
+       style="display:block"
+       data-ad-client="ca-pub-7023023584987784"
+       data-ad-slot="2698286691"
+       data-ad-format="auto"
+       data-full-width-responsive="true">
+      </Adsense>
     </span>
     <br/>
     <div>
-      <label for="genre-select">Select A Genre</label>
+      <label for="genre-select">Type A Genre</label>
       <br/>
-      <select v-model="genre" id="genre-select">
-        <option v-for="(g, index) in genres" :key="index" :value="g"> {{g}} </option>
-      </select>
+      <input type="text" id="genre-select" v-model="genre" list="genres" />
+        <datalist id="genres">
+          <option v-for="(g, index) in genres" :key="index" :value="g"> {{g}} </option>
+        </datalist>
     </div>
+    <br />
     <div>
-      <label for="length-select">Select A Story Length</label>
+      <label for="length-select">Type A Story Length</label>
       <br/>
-      <select v-model="length" id="length-select">
-        <option v-for="(l, index) in lengths" :key="index" :value="l"> {{l}} </option>
-      </select>
+      <input type="text" id="length-select" v-model="length" list="lengths" />
+        <datalist id="lengths">
+          <option v-for="(l, index) in lengths" :key="index" :value="l"> {{l}} </option>
+        </datalist>
     </div>
     <br/>
     <div>
@@ -37,10 +47,11 @@
     </div>
     <br/>
     <div>
-    <button @click="generateBook" v-if="readyToGenerate">Generate {{genre}} Short</button>
-    <ul v-if="isPlaying">
-      <button @click="stopStory" >Stop</button>
+    <ul>
+      <button @click="generateBook" v-if="readyToGenerate">Generate {{genre}} Story</button>
+      <button @click="stopStory" v-else>Stop</button>
     </ul>
+      {{this.currentBook.text}}
   </div>
   <Adsense
    style="display:block"
@@ -62,14 +73,16 @@ export default {
       isPlaying: false,
       openAi: {},
       books: [],
-      currentBook: {},
+      currentBook: {
+        text: ''
+      },
       selectedIndex: -1,
       selectedVoice: {},
       userIdea: '',
-      genre: 'Horror',
-      genres: ['Horror', 'Comedy', 'Love', 'Murder Mystery', 'Sci-Fi'],
+      genre: '',
+      genres: ['Horror', 'Comedy', 'Love', 'True Crime', 'Sci-Fi', 'Fantasy', 'History', 'Action', 'Politics', 'Spirituality', 'Prose', 'Western', 'Legend', 'Erotica'],
       lengths: ['2 sentence', '1 paragraph', '2 paragraph', '3 paragraph','4 paragraph','5 paragraph','6 paragraph','7 paragraph','8 paragraph','9 paragraph','10 paragraph'],
-      length: '2 sentence',
+      length: '',
       voices: []
     }
   },
@@ -84,15 +97,15 @@ export default {
     const json = await res.json()
     this.openAi = new OpenAi(json.token, {
       pitch: 0.88,
-      rate: 0.88
+      rate: 0.80
     })
     this.openAi.addEventListener('storygenerating', function (event) {
       console.log(event)
     })
     this.openAi.addEventListener('storygenerated', function (event) {
-      console.log(event)
       this.isLoading = false
       this.currentBook = event.detail.book
+
     })
     this.openAi.addEventListener('speechkitutterancestarted', function(event) {
       console.log(event)
@@ -110,12 +123,18 @@ export default {
     loading () {
       return this.isLoading
     },
+    playing () {
+      return this.isPlaying
+    },
     prompt () {
       if(this.userIdea != '') {
         return `generate a ${this.length} ${this.genre} story based on ${this.userIdea} with a title. Return a well formatted JSON object with a title property that contains the title, a text property that contains the story and ssml property that contains an well formatted SSML file prefixing <?xml version="1.0" ?> generated from the story. Serialized the JSON object as a string.`
       } else {
         return `generate a ${this.length} ${this.genre} story with a title. Return a well formatted JSON object with a title property that contains the title, a text property that contains the story and ssml property that contains an well formatted SSML file prefixing <?xml version="1.0" ?> generated from the story. Serialized the JSON object as a string.`
       }
+    },
+    storyText () {
+      return this.currentBook.text
     }
   },
   methods: {
@@ -131,6 +150,7 @@ export default {
     stopStory () {
       this.openAi.stopStory()
       this.isPlaying = false
+      this.isLoading = false
     },
     resumeStory () {
       this.openAi.resumeStory()
