@@ -55,12 +55,10 @@ export default class OpenAi extends EventTarget {
 
   async readStory (prompt) {
     try {
-      this.sk.addEventListener('speechkitutterancestart', function (event) {
-        console.log(event)
+      this.sk.addEventListener('speechkitutterancestart', function () {
         this.isPlaying =  true
       })
-      this.sk.addEventListener('speechkitutteranceend', function (event) {
-        console.log(event)
+      this.sk.addEventListener('speechkitutteranceend', function () {
         this.isPlaying =  false
         this.dispatchEvent(new CustomEvent('storyreadended',{
           bubbles: true,
@@ -120,7 +118,6 @@ export default class OpenAi extends EventTarget {
         body: JSON.stringify({data:book}) // body data type must match "Content-Type" header
       })
     } catch (e){
-      console.log(e)
       return e
     }
   }

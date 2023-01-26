@@ -98,21 +98,20 @@ export default {
       pitch: 0.88,
       rate: 0.80
     })
-    this.openAi.addEventListener('storygenerating', function (event) {
-      console.log(event)
+    this.openAi.addEventListener('storygenerating', function () {
+      this.isLoading = true
     })
     this.openAi.addEventListener('storygenerated', function (event) {
       this.isLoading = false
       this.currentBook = event.detail.book
 
     })
-    this.openAi.addEventListener('speechkitutterancestarted', function(event) {
-      console.log(event)
+    this.openAi.addEventListener('speechkitutterancestarted', function() {
+      this.isPlaying = true
     })
-    this.openAi.sk.synth.addEventListener('end', function(event) {
+    this.openAi.sk.synth.addEventListener('end', function() {
       this.isPlaying = false
       this.isLoading = false
-      console.log(event)
     })
   },
   computed: {
