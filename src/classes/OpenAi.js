@@ -30,16 +30,13 @@ export default class OpenAi extends EventTarget {
       });
       this.books = await res.json()
       this.booksReady = true
-      console.log(JSON.parse(this.books.choices[0].text.trim()))
       this.currentBook = JSON.parse(this.books.choices[0].text.trim())
-      console.log(this.currentBook)
       this.dispatchEvent(new CustomEvent('storygenerated', {
         detail: {
           book: this.currentBook
         }
       }))
     } catch (e){
-      console.log(e)
       this.booksReady = false
       this.dispatchEvent(new Event('storygeneratederror'))
     }
@@ -67,7 +64,7 @@ export default class OpenAi extends EventTarget {
           }
         }))
       })
-      const data = { model: "text-davinci-003", prompt: prompt, temperature: 0.95, max_tokens: 1200}
+      const data = { model: "text-davinci-003", prompt: prompt, temperature: 1, max_tokens: 2048}
 
       await this.generateBook(data)
       if(this.booksReady) {
