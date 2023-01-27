@@ -56,13 +56,17 @@ export default class OpenAi extends EventTarget {
   }
 
   async readStory (prompt, genreIndex = 0) {
+    const that = this
     try {
-      this.sk.addEventListener('speechkitutterancestart', function () {
+      this.addEventListener('speechkitutterancestart', function () {
         this.isPlaying =  true
+        console.log('hi')
       })
-      this.sk.addEventListener('speechkitutteranceend', function () {
-        this.isPlaying =  false
-        this.dispatchEvent(new CustomEvent('storyreadended',{
+      this.sk.addEventListener('speechkitspeechend', function () {
+        console.log('hi')
+        that.isPlaying =  false
+        console.log('stop')
+        that.dispatchEvent(new CustomEvent('storyreadended',{
           bubbles: true,
           detail: {
             book: this.currentBook

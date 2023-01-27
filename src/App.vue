@@ -2,8 +2,6 @@
   <div id="app">
     <img alt="GPT Audiobook logo" height="256px" width="256px" src="./assets/gpt-audiobook-logo.png">
     <span>
-      <h2 v-if="loading"> Generating AI Short Story</h2>
-      <h2 v-else> AI Generated Audiobooks </h2>
       <Adsense
        style="display:block"
        data-ad-client="ca-pub-7023023584987784"
@@ -11,6 +9,22 @@
        data-ad-format="auto"
        data-full-width-responsive="true">
       </Adsense>
+      <h2 v-if="loading"> Generating AI Short Story</h2>
+      <h2 v-else> AI Generated Audiobooks </h2>
+      <p>
+        Welcome to GPT Audiobooks, created by <a href="https://jyroneparker.com">Jyrone Parker</a>
+        These are audiobooks that are generated with ChatGPT artificial intelligence and read back to you using the Web Speech API.
+
+        To get started:
+      
+          Input a <a href="#genre-select">genre</a> you want to create
+           Input a <a href="#length-select">story length</a>
+           Input a <a href="#story-prompt">story prompt</a>. This is optional, leaving it blank will instruct AI to be totally creative!
+           Select <a href="#voice-select">voice to read</a>. This is optional, leaving it blank will use system default voice.
+           Select a <a href="#music-select">background music track.</a>. This is optional, leaving it blank will use a random track.
+           Click the  <a href="#generate-book">generate story</a> button, give ChatGPT some time and enjoy!
+
+      </p>
     </span>
     <br/>
     <div>
@@ -56,7 +70,7 @@
     <br/>
     <div>
     <ul>
-      <button @click="generateBook" v-if="readyToGenerate">Generate {{genre}} Story</button>
+      <button @click="generateBook" v-if="readyToGenerate" id="generate-book">Generate {{genre}} Story</button>
       <button @click="stopStory" v-else>Stop</button>
     </ul>
       {{getStoryText}}
@@ -141,9 +155,11 @@ export default {
     },
     prompt () {
       if(this.getIdea != '') {
-        return `generate a ${this.length} ${this.genre} story based on ${this.userIdea} with a title. Return a well formatted JSON object with a title property that contains the title, a text property that contains the story and ssml property that contains an well formatted SSML file prefixing <?xml version="1.0" ?> generated from the story. Serialized the JSON object as a string.`
+        return `generate a ${this.length} ${this.genre} story based on ${this.userIdea} with a title. Return a well formatted JSON object with a title property that contains the title, a text property that contains the story and ssml property that contains an well formatted SSML file prefixing <?xml version="1.0" ?><speak version="1.1" xmlns="http://www.w3.org/2001/10/synthesis"
+        xml:lang="en-US"> generated from the story. Serialized the JSON object as a string.`
       } else {
-        return `generate a ${this.length} ${this.genre} story with a title. Return a well formatted JSON object with a title property that contains the title, a text property that contains the story and ssml property that contains an well formatted SSML file prefixing <?xml version="1.0" ?> generated from the story. Serialized the JSON object as a string.`
+        return `generate a ${this.length} ${this.genre} story with a title. Return a well formatted JSON object with a title property that contains the title, a text property that contains the story and ssml property that contains an well formatted SSML file prefixing <?xml version="1.0" ?><speak version="1.1" xmlns="http://www.w3.org/2001/10/synthesis"
+       xml:lang="en-US"> generated from the story. Serialized the JSON object as a string.`
       }
     },
     getStoryText () {

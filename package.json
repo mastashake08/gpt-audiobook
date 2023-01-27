@@ -11,7 +11,7 @@
     "deploy": "npm run build  &&  git commit -am 'deploy to github' && git push "
   },
   "dependencies": {
-    "@mastashake08/speech-kit": "file://~/Desktop/mastashake08-speech-kit-2.0.5.tgz",
+    "@mastashake08/speech-kit": "file://~/Desktop/mastashake08-speech-kit-2.0.8.tgz",
     "core-js": "^3.8.3",
     "vue": "^2.6.14",
     "vue-google-adsense": "^1.10.1",
