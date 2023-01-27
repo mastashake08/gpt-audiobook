@@ -6,13 +6,14 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
+    "deploy": "npm run build  &&  git commit -am 'deploy to github' && git push ",
     "buildSk": "cd ../speech-kit/ && sh local-build.sh 2.0.1 ~/Desktop ",
-    "localTest": "npm run buildSk && rm -rf node_modules/ && npm install && npm run serve",
-    "deploy": "npm run build  &&  git commit -am 'deploy to github' && git push "
+    "localTest": "npm run buildSk && rm -rf node_modules/ && npm install && npm run serve"
   },
   "dependencies": {
     "@mastashake08/speech-kit": "file://~/Desktop/mastashake08-speech-kit-2.0.8.tgz",
     "core-js": "^3.8.3",
+    "register-service-worker": "^1.7.2",
     "vue": "^2.6.14",
     "vue-google-adsense": "^1.10.1",
     "vue-script2": "^2.1.0"
@@ -22,6 +23,7 @@
     "@babel/eslint-parser": "^7.12.16",
     "@vue/cli-plugin-babel": "~5.0.0",
     "@vue/cli-plugin-eslint": "~5.0.0",
+    "@vue/cli-plugin-pwa": "^5.0.8",
     "@vue/cli-service": "~5.0.0",
     "eslint": "^7.32.0",
     "eslint-plugin-vue": "^8.0.3",
