@@ -5,7 +5,7 @@ export default class OpenAi extends EventTarget {
     super()
     this.apiKey = apiKey
     this.sk = new SpeechKit(speechOptions)
-    this.baseUrl = 'https://api.openai.com/v1/completions'
+    this.baseUrl = 'https://api.openai.com/v1/chat/completions'
     this.books = {}
     this.booksReady = false
     this.currentBook = {}
@@ -35,7 +35,7 @@ export default class OpenAi extends EventTarget {
       });
       this.books = await res.json()
       this.booksReady = true
-      this.currentBook = JSON.parse(this.books.choices[0].text.trim())
+      this.currentBook = JSON.parse(this.books.choices[0].message.content.trim())
       this.dispatchEvent(new CustomEvent('storygenerated', {
         detail: {
           book: this.currentBook
@@ -73,7 +73,7 @@ export default class OpenAi extends EventTarget {
           }
         }))
       })
-      const data = { model: "text-davinci-003", prompt: prompt, temperature: 1, max_tokens: 2048}
+      const data = { model: "gpt-3.5-turbo", messages: [{content:prompt,role: 'system'}]}
 
       await this.generateBook(data)
       if(this.booksReady) {
